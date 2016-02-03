@@ -2,37 +2,56 @@ package com.epam.zhmyd.mentoring;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 class MessageBus {
 
     private Queue<String> storage = new LinkedList<String>();
-    private int maxSize =10;
+    private int maxSize = 10;
 
-    public MessageBus(int maxSize){
+    private Condition read;
+    private Condition write;
+    private Lock lock;
+
+    public MessageBus(int maxSize) {
         this.maxSize = maxSize;
-    }
-    public synchronized void set(String message){
-        while (storage.size()==maxSize){
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        storage.add(message);
-        notifyAll();
+        this.lock = new ReentrantLock();
+        this.read = lock.newCondition();
+        this.write = lock.newCondition();
     }
 
-    public synchronized String get(){
-        while (storage.size()==0){
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    public void set(String message) {
+        lock.lock();
+        try {
+            while (storage.size() == maxSize) {
+                read.await();
             }
+            storage.add(message);
+            write.signalAll();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
         }
-        String result = storage.poll();
-        notifyAll();
+    }
+
+    public String get() {
+        String result = null;
+        lock.lock();
+        try {
+            while (storage.size() == 0) {
+               write.await();
+            }
+
+            result = storage.poll();
+            read.signalAll();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
         return result;
     }
 }

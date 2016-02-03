@@ -2,9 +2,6 @@ package com.epam.zhmyd.mentoring;
 
 import java.util.Random;
 
-/**
- * Created by Aliaksandr_Zhmaidzia on 2/3/2016.
- */
 public class Producer implements Runnable{
 
     private final int id;
