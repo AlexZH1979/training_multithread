@@ -5,7 +5,7 @@ public class App
 {
     public static void main( String[] args )
     {
-        MessageBus messageBus = new MessageBus(20);
+        MessageBus messageBus = new MessageBus(5);
         for (int i = 0; i < 5; i++) {
             Producer producer = new Producer(i,messageBus);
             Thread threadProducer = new Thread(producer);
