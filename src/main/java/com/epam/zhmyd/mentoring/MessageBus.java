@@ -1,6 +1,7 @@
 package com.epam.zhmyd.mentoring;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -8,7 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 class MessageBus {
 
-    private Queue<String> storage = new LinkedList<String>();
+    private List<String> storage = new LinkedList<String>();
     private int maxSize = 10;
 
     private Condition read;
@@ -45,7 +46,7 @@ class MessageBus {
                write.await();
             }
 
-            result = storage.poll();
+            result = storage.remove(0);
             read.signalAll();
         } catch (InterruptedException e) {
             e.printStackTrace();
