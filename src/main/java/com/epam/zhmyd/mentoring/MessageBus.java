@@ -27,10 +27,10 @@ class MessageBus {
         lock.lock();
         try {
             while (storage.size() == maxSize) {
-                read.await();
+                write.await();
             }
             storage.add(message);
-            write.signalAll();
+            read.signalAll();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
@@ -43,11 +43,11 @@ class MessageBus {
         lock.lock();
         try {
             while (storage.size() == 0) {
-               write.await();
+               read.await();
             }
 
             result = storage.remove(0);
-            read.signalAll();
+            write.signalAll();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
